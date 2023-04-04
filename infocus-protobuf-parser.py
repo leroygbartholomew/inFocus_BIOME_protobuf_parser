@@ -309,6 +309,10 @@ def import_knowledgec():
 	
 	sql_cur.execute(sqlquery)
 	
+	sqlquery = """CREATE TABLE IF NOT EXISTS 'ZSOURCE' AS 
+	SELECT * FROM KC.ZSOURCE"""
+	
+	sql_cur.execute(sqlquery)
 	
 	
 	logging.info('QUERY USED TO IMPORT TABLE DATA:')
