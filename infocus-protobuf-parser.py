@@ -215,19 +215,6 @@ def read_bioms(bytes_to_search, buf_file):
 		sec_i = zenddate_i - zstartdate_i
 
 
-        # DISPLAY THE RECORS AS THEY ARE FOUND TO SHOW SOMETHING IS GOING ON (turned off for optimization)
-		#print('================ NEW RECORD ===================')
-		#print(f'IN FILE: {buf_file}')
-		#print(f'HIT:  {hit}')
-		#print('VARIABLES')
-		#print(f'ZSTREAMNAME: {zstreamname_t}')
-		#print(f'ZSTARTDATE: {zstartdate_i}, {zstartdate_t}')
-		#print(f'ZENDDATE: {zenddate_i}, {zenddate_t}')
-		#print(f'SECONDS: {sec_i}')
-		#print(f'ZVALUESTRING: {zvaluestring_t}')
-		#print(f'ZUUID: {zuuid_t}')
-		#print(f'ZTRANSITION: {ztransition_t}')
-
 		# SET THE INSERT RECORD QUERY
 		sql_insert = f"""INSERT INTO BIOME_INFOCUS (ZVALUEINTEGER, ZSTREAMNAME, ZSTARTDATE, ZSTARTDATE_T, 
 		ZENDDATE, ZENDDATE_T, SECONDS, ZVALUESTRING, ZUUID, ZTRANSITION, FILENAME, LOCATION_D)
@@ -312,11 +299,17 @@ def import_knowledgec():
 	
 	print(f'{kc} attached as "KC" in {of_db}')
 
-	sqlquery = """CREATE TABLE IF NOT EXISTS'ZOBJECT_IMPORT' AS 
-	SELECT Z_PK, ZVALUEINTEGER, ZSTARTDATE, ZENDDATE, ZUUID, 
-	ZSTREAMNAME, ZVALUESTRING FROM KC.ZOBJECT ORDER BY ZSTARTDATE"""
+	sqlquery = """CREATE TABLE IF NOT EXISTS 'ZOBJECT' AS 
+	SELECT * FROM KC.ZOBJECT ORDER BY ZSTARTDATE"""
 	
 	sql_cur.execute(sqlquery)
+	
+	sqlquery = """CREATE TABLE IF NOT EXISTS 'ZSTRUCTUREDMETADATA' AS 
+	SELECT * FROM KC.ZSTRUCTUREDMETADATA"""
+	
+	sql_cur.execute(sqlquery)
+	
+	
 	
 	logging.info('QUERY USED TO IMPORT TABLE DATA:')
 	logging.info(sqlquery)
@@ -325,15 +318,15 @@ def import_knowledgec():
 	
 	sqlquery = """CREATE TABLE IF NOT EXISTS 'ACTIVITY_COMBINED' AS
 	SELECT 
-	datetime(ZOBJECT_IMPORT.ZSTARTDATE + 978307200,'unixepoch') AS "STARTTIME",
-	ZOBJECT_IMPORT.ZSTARTDATE, 
-	datetime(ZOBJECT_IMPORT.ZENDDATE + 978307200,'unixepoch') AS "ENDTIME",
-	ZOBJECT_IMPORT.ZENDDATE,
-	ZOBJECT_IMPORT.ZSTREAMNAME, 
-	ZOBJECT_IMPORT.ZVALUESTRING, 
-	ZOBJECT_IMPORT.ZENDDATE - ZOBJECT_IMPORT.ZSTARTDATE AS "SECONDS",
-	ZOBJECT_IMPORT.ZVALUEINTEGER
-	FROM ZOBJECT_IMPORT
+	datetime(ZOBJECT.ZSTARTDATE + 978307200,'unixepoch') AS "STARTTIME",
+	ZOBJECT.ZSTARTDATE, 
+	datetime(ZOBJECT.ZENDDATE + 978307200,'unixepoch') AS "ENDTIME",
+	ZOBJECT.ZENDDATE,
+	ZOBJECT.ZSTREAMNAME, 
+	ZOBJECT.ZVALUESTRING, 
+	ZOBJECT.ZENDDATE - ZOBJECT.ZSTARTDATE AS "SECONDS",
+	ZOBJECT.ZVALUEINTEGER
+	FROM ZOBJECT
 	UNION ALL
 	SELECT 
 	datetime(BIOME_INFOCUS.ZSTARTDATE + 978307200,'unixepoch') AS "STARTTIME",
